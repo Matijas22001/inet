@@ -202,5 +202,16 @@ void InterPacketGap::pushOrSendOrScheduleProgress(Packet *packet, cGate *gate, i
     }
 }
 
+
+const char *InterPacketGap::resolveDirective(char directive) const
+{
+    switch (directive) {
+        case 'g':
+            return simtime_t(par("duration").doubleValue()).ustr().c_str();
+        default:
+            return PacketPusherBase::resolveDirective(directive);
+    }
+}
+
 } // namespace inet
 
