@@ -178,6 +178,7 @@ void EtherMacFullDuplexBase::initialize(int stage)
         lowerLayerInGateId = gate("phyIn")->getId();
         lowerLayerOutGateId = gate("phyOut")->getId();
         currentTxFrame = nullptr;
+        fcsMode = parseFcsMode(par("fcsMode"));
 
         initializeFlags();
 
@@ -611,9 +612,8 @@ void EtherMacFullDuplexBase::changeReceptionState(MacReceiveState newState)
     emit(receptionStateChangedSignal, newState);
 }
 
-void EtherMacFullDuplexBase::addPaddingAndSetFcs(Packet *packet, B requiredMinBytes) const
+void EtherMacFullDuplexBase::addPaddingAndFcs(Packet *packet, B requiredMinBytes) const
 {
-    auto ethFcs = packet->removeAtBack<EthernetFcs>(ETHER_FCS_BYTES);
 
     B paddingLength = requiredMinBytes - ETHER_FCS_BYTES - B(packet->getByteLength());
     if (paddingLength > B(0)) {
@@ -622,7 +622,8 @@ void EtherMacFullDuplexBase::addPaddingAndSetFcs(Packet *packet, B requiredMinBy
         packet->insertAtBack(ethPadding);
     }
 
-    switch(ethFcs->getFcsMode()) {
+    auto ethFcs = makeShared<EthernetFcs>(fcsMode);
+    switch(fcsMode) {
         case FCS_DECLARED_CORRECT:
             ethFcs->setFcs(0xC00DC00DL);
             break;
