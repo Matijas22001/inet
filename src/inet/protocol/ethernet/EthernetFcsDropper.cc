@@ -27,7 +27,7 @@ Define_Module(EthernetFcsDropper);
 void EthernetFcsDropper::processPacket(Packet *packet)
 {
     const auto& trailer = packet->popAtBack<EthernetFcs>(ETHER_FCS_BYTES);
-    auto packetProtocolTag = packet->getTag<PacketProtocolTag>();
+    auto& packetProtocolTag = packet->getTagForUpdate<PacketProtocolTag>();
     packetProtocolTag->setBackOffset(packetProtocolTag->getBackOffset() + trailer->getChunkLength());
 }
 
