@@ -26,7 +26,9 @@ Define_Module(EthernetFcsDropper);
 
 void EthernetFcsDropper::processPacket(Packet *packet)
 {
-    packet->popAtBack<EthernetFcs>(B(4));
+    const auto& trailer = packet->popAtBack<EthernetFcs>(ETHER_FCS_BYTES);
+    auto packetProtocolTag = packet->getTag<PacketProtocolTag>();
+    packetProtocolTag->setBackOffset(packetProtocolTag->getBackOffset() + trailer->getChunkLength());
 }
 
 } // namespace inet
